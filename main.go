@@ -1,16 +1,26 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"net/http"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	log "github.com/sirupsen/logrus"
 )
 
+var (
+	appVersion = "dirty"
+)
+
 func main() {
-	//This section will start the HTTP server and expose
-	//any metrics on the /metrics endpoint.
-	http.Handle("/metrics", promhttp.Handler())
-	log.Info("Beginning to serve on port :8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	var port int
+
+	flag.IntVar(&port, "port", 9501, "Prometheus port")
+	flag.Parse()
+
+	log.Info("Beginning to serve on port :", port)
+
+	http.Handle("/probe", promhttp.Handler())
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), nil))
 }
